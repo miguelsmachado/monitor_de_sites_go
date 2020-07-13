@@ -116,26 +116,38 @@ func testanodSite(site string) {
 
 func monitoramentoComArquivo() {
 	var lista []string
+
+	// Abrimos o arquivo com o os
 	arquivo, err := os.Open("sites.txt")
+	// tratando possíveis erros
 	if err != nil {
 		fmt.Println("Ocorreu um erro:", err)
 	}
 
+	// Usando a biblioteca bufio e o método NewReader, vamos gerar um leitor
+	// passamos o arquivo como parametro
 	leitor := bufio.NewReader(arquivo)
 
+	// Aqui, vamos usar a mesma técnica da função acima, mas desse vez fazendo um laço
+	// for para ler linha por linha
 	for {
 		linha, err := leitor.ReadString('\n')
+		// Com a biblioteca strings, podemos eliminar os espaços do final de cada linha
+		// Como o strip no python
 		linha = strings.TrimSpace(linha)
 		lista = append(lista, linha)
 
+		// vamos usar o erro EOF (End of File) para encerrar o loop quando não houver mais nada para ser lido
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			fmt.Println("Ocorreu um erro:", err)
 		}
 	}
+
 	arquivo.Close()
 
+	// Realizando o monitoramento
 	for i := 0; i < monitoramento; i++ {
 		for i, site := range lista {
 			fmt.Println("Site nr", i+1, ":", site)
@@ -155,6 +167,7 @@ func registraLog(site string, status bool) {
 		fmt.Println("Ocorreu um erro", err)
 	}
 	if status == true {
+		// O go utiliza um padrao de escrita para data/hora, consultar documentação antes de preencher
 		arquivo.WriteString(time.Now().Format("02/01/2006 - 15:04:05 -> ") + site + " esta online\n")
 	} else if status == false{
 		arquivo.WriteString(time.Now().Format("02/01/2006 - 15:04:05 -> ") + site + " esta offline\n")
@@ -167,6 +180,8 @@ func exibeLogs(){
 	fmt.Println("Exibindo logs...")
 	fmt.Println("")
 
+	//A biblioteca io/ioutil permite que se leia o arquivo todo de uma só vez
+	// Não é necessário fechar.
 	arquivo, _  := ioutil.ReadFile("log.txt")
 
 	fmt.Println(string(arquivo))
